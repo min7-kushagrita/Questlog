@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuestLog - Student Operating System | RPG Focus, Academics & AI</title>
+  <meta name="description" content="Complete Student Productivity, College Communication, Gamification, Career & AI Platform with 3D Character Studio, QuestLog Pulse, College Brain, and Career Skill Trees.">
+  
+  <!-- Google Fonts: Outfit for modern UI, Orbitron & JetBrains Mono for arcade stats -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Three.js WebGL 3D Engine & Loaders (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1" aria-hidden="true"></div>
+  <div class="ambient-glow glow-2" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- Ambient Particle Canvas for aesthetic -->
+  <canvas id="ambient-particles" class="ambient-particles" aria-hidden="true"></canvas>
+
+  <!-- Confetti Canvas for Level Up & Victory Celebrations -->
+  <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Floating XP popup container for dynamic particles -->
+  <div id="xp-floating-container" class="xp-floating-container" aria-hidden="true"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       CORE FEATURE 1: AUTHENTICATION GATEWAY (STUDENT & ADMIN)
+       ======================================================================== -->
+  <div id="auth-gateway" class="auth-gateway-overlay">
+    <div class="auth-card glass-panel">
+      <div class="auth-glow" aria-hidden="true"></div>
+      
+      <div class="auth-emblem">
+        <svg class="auth-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="14.5 17.5 3 6 3 3 6 3 17.5 14.5 14.5 17.5" fill="rgba(138, 43, 226, 0.5)"></polygon>
+          <line x1="13" y1="19" x2="19" y2="13"></line>
+          <line x1="16" y1="16" x2="20" y2="20"></line>
+          <line x1="19" y1="21" x2="21" y2="19"></line>
+        </svg>
+      </div>
+
+      <div class="auth-header">
+        <h1 class="auth-title font-arcade">QUESTLOG</h1>
+        <span class="auth-subtitle">STUDENT OS // COMMAND AUTHENTICATION GATEWAY</span>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <div class="auth-input-group">
+          <label for="login-gamertag" class="auth-label">
+            <span>OPERATOR CODENAME / USERNAME</span>
+            <span class="label-hint">(Student or Admin)</span>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input 
+              type="text" 
+              id="login-gamertag" 
+              class="glass-input auth-field" 
+              placeholder="e.g. CyberVanguard or manish" 
+              required 
+              maxlength="30"
+              autocomplete="username"
+            >
+          </div>
+        </div>
+
+        <div class="auth-input-group">
+          <label for="login-password" class="auth-label">
+            <span>ACCESS KEY</span>
+            <span class="label-hint">(Admin: 12345678999)</span>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔑</span>
+            <input 
+              type="password" 
+              id="login-password" 
+              class="glass-input auth-field" 
+              placeholder="Enter access passcode..." 
+              required
+              autocomplete="current-password"
+            >
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" id="login-submit-btn" class="glow-action-btn btn-primary-grind auth-btn">
+            <span class="btn-pulse" aria-hidden="true"></span>
+            <span class="btn-icon">⚡</span>
+            <span>Authenticate & Launch</span>
+          </button>
+        </div>
+
+        <div class="auth-quick-creds">
+          <span class="quick-text">Quick Launch:</span>
+          <button type="button" class="quick-tag-pill" data-tag="Hexblade_99" data-pass="password123">Student: Hexblade</button>
+          <button type="button" class="quick-tag-pill" data-tag="ArchMage_OSS" data-pass="password123">Student: ArchMage</button>
+          <button type="button" class="quick-tag-pill admin-quick-pill" data-tag="manish" data-pass="12345678999">👑 Admin: manish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       FEATURE 1: REAL ADMIN PORTAL (PROTECTED ROUTE)
+       ======================================================================== -->
+  <div id="admin-app" class="admin-container" style="display: none;">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar glass-panel">
+      <div class="admin-brand">
+        <div class="admin-brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2" fill="rgba(245, 158, 11, 0.4)"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h2 class="admin-title font-arcade">QUESTLOG</h2>
+          <span class="admin-subtitle">ADMIN CONTROL MATRIX</span>
+        </div>
+      </div>
+
+      <div class="admin-operator-card">
+        <div class="admin-avatar">👑</div>
+        <div class="admin-info">
+          <strong class="font-arcade">MANISH</strong>
+          <span class="admin-role-badge">SUPER ADMIN</span>
+        </div>
+      </div>
+
+      <nav class="admin-nav" role="navigation">
+        <button class="admin-nav-item active" data-admin-view="dashboard">
+          <span class="admin-nav-icon">📊</span><span>Dashboard</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="students">
+          <span class="admin-nav-icon">👥</span><span>Students</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="assignments">
+          <span class="admin-nav-icon">📚</span><span>Assignments</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="notifications">
+          <span class="admin-nav-icon">🔔</span><span>Notifications</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="exams">
+          <span class="admin-nav-icon">📝</span><span>Exams</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="events">
+          <span class="admin-nav-icon">🎪</span><span>Events</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="alerts">
+          <span class="admin-nav-icon">🚨</span><span>Alerts</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="opportunities">
+          <span class="admin-nav-icon">🚀</span><span>Opportunities</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="communication">
+          <span class="admin-nav-icon">💬</span><span>Communication</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="skilltree">
+          <span class="admin-nav-icon">🗺️</span><span>Skill Tree</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="analytics">
+          <span class="admin-nav-icon">📈</span><span>Analytics</span>
+        </button>
+        <button class="admin-nav-item" data-admin-view="settings">
+          <span class="admin-nav-icon">⚙️</span><span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <button id="admin-logout-btn" class="glass-btn btn-danger-subtle w-full">
+          <span class="btn-icon">🚪</span><span>Admin Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Admin Main Body -->
+    <main class="admin-main">
+      <header class="admin-topbar glass-panel">
+        <div class="admin-view-title-group">
+          <span class="admin-view-badge" id="admin-view-badge">COMMAND CENTER</span>
+          <h1 class="admin-view-title font-arcade" id="admin-view-title">Admin Dashboard</h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <span class="status-indicator online"></span>
+          <span class="admin-sync-tag font-mono">SQLite Live &bull; Port 3000</span>
+          <button id="admin-quick-summon-btn" class="glow-action-btn btn-primary-grind btn-compact">
+            <span>⚡ Broadcast Alert</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Admin View: Dashboard -->
+      <section id="admin-view-dashboard" class="admin-view-section">
+        <div class="admin-stats-grid">
+          <div class="admin-kpi-card glass-panel">
+            <div class="kpi-icon">👥</div>
+            <div class="kpi-data"><span class="kpi-label">Active Students</span><strong class="kpi-val" id="admin-stat-students">128</strong></div>
+          </div>
+          <div class="admin-kpi-card glass-panel">
+            <div class="kpi-icon">⚔️</div>
+            <div class="kpi-data"><span class="kpi-label">Total Quests Cleared</span><strong class="kpi-val" id="admin-stat-quests">412</strong></div>
+          </div>
+          <div class="admin-kpi-card glass-panel">
+            <div class="kpi-icon">📚</div>
+            <div class="kpi-data"><span class="kpi-label">Active Assignments</span><strong class="kpi-val" id="admin-stat-assignments">3</strong></div>
+          </div>
+          <div class="admin-kpi-card glass-panel">
+            <div class="kpi-icon">🚨</div>
+            <div class="kpi-data"><span class="kpi-label">Active Campus Alerts</span><strong class="kpi-val" id="admin-stat-alerts">1</strong></div>
+          </div>
+        </div>
+
+        <div class="admin-dashboard-columns">
+          <div class="admin-panel glass-panel">
+            <div class="admin-panel-header">
+              <h3>⚡ Quick Content Creators</h3>
+              <span>Instant sync to student portal</span>
+            </div>
+            <div class="admin-quick-buttons">
+              <button class="admin-action-chip" onclick="AdminApp.openModal('assignment')">➕ Post Assignment</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('notification')">🔔 Send Notification</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('exam')">📝 Schedule Exam</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('event')">🎪 Publish Event</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('alert')">🚨 Broadcast Urgent Alert</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('opportunity')">🚀 Post Opportunity</button>
+              <button class="admin-action-chip" onclick="AdminApp.openModal('communication')">💬 Broadcast College Message</button>
+            </div>
+          </div>
+
+          <div class="admin-panel glass-panel">
+            <div class="admin-panel-header">
+              <h3>📢 Recent System Broadcasts</h3>
+              <button class="text-action-btn" onclick="AdminApp.switchView('communication')">View All</button>
+            </div>
+            <div id="admin-recent-broadcasts" class="admin-recent-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin View: Students -->
+      <section id="admin-view-students" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <input type="text" id="admin-student-search" class="glass-input" placeholder="Search student by codename, branch or year...">
+          <select id="admin-student-filter-branch" class="glass-select">
+            <option value="all">All Branches</option>
+            <option value="CSE">CSE</option>
+            <option value="IT">IT</option>
+            <option value="ECE">ECE</option>
+          </select>
+        </div>
+        <div class="admin-table-wrapper glass-panel">
+          <table class="admin-data-table">
+            <thead>
+              <tr>
+                <th>Operator</th>
+                <th>Level</th>
+                <th>Total XP</th>
+                <th>Streak</th>
+                <th>Quests Done</th>
+                <th>Focus Time</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-students-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Admin View: Assignments -->
+      <section id="admin-view-assignments" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Course Assignments</h3><p class="sub-text">Assignments automatically convert into student bounties on the Quest Board.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('assignment')">➕ Create Assignment</button>
+        </div>
+        <div id="admin-assignments-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Notifications -->
+      <section id="admin-view-notifications" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Campus Notifications</h3><p class="sub-text">Pushed directly to student notification bell & smart reminders.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('notification')">🔔 Send Broadcast</button>
+        </div>
+        <div id="admin-notifications-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Exams -->
+      <section id="admin-view-exams" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Examination Schedules</h3><p class="sub-text">Schedules populate the student Smart Calendar & College Brain search.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('exam')">📝 Schedule Exam</button>
+        </div>
+        <div id="admin-exams-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Events -->
+      <section id="admin-view-events" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Campus & Club Events</h3><p class="sub-text">Events appear in the Calendar, Campus World, and Opportunities directory.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('event')">🎪 Create Event</button>
+        </div>
+        <div id="admin-events-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Alerts -->
+      <section id="admin-view-alerts" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Urgent Campus Alerts</h3><p class="sub-text">Displays prominent glowing banners across student dashboard.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('alert')">🚨 Broadcast Alert</button>
+        </div>
+        <div id="admin-alerts-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Opportunities -->
+      <section id="admin-view-opportunities" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Opportunities & Hackathons</h3><p class="sub-text">Hackathons, internships, scholarships, competitions & club recruitments.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('opportunity')">🚀 Post Opportunity</button>
+        </div>
+        <div id="admin-opportunities-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Communication -->
+      <section id="admin-view-communication" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Official College Communication Feed</h3><p class="sub-text">Broadcast messages here. QuestLog Pulse extracts quests & College Brain indexes them.</p></div>
+          <button class="glow-action-btn btn-primary-grind btn-compact" onclick="AdminApp.openModal('communication')">💬 Broadcast Message</button>
+        </div>
+        <div id="admin-communication-list" class="admin-cards-grid"></div>
+      </section>
+
+      <!-- Admin View: Skill Tree -->
+      <section id="admin-view-skilltree" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">Curriculum Skill Tracks</h3><p class="sub-text">Manage competencies and progression nodes across all 7 career paths.</p></div>
+        </div>
+        <div id="admin-skilltree-overview" class="admin-curriculum-grid"></div>
+      </section>
+
+      <!-- Admin View: Analytics -->
+      <section id="admin-view-analytics" class="admin-view-section" hidden>
+        <div class="admin-toolbar glass-panel">
+          <div><h3 class="m-0">College-Wide Analytics</h3><p class="sub-text">Aggregate student engagement, quest completion rates, and subject proficiency.</p></div>
+        </div>
+        <div class="admin-analytics-dashboard">
+          <div class="analytics-chart-panel glass-panel">
+            <h4>Quest Completion by Subject</h4>
+            <div id="admin-chart-subjects" class="chart-container"></div>
+          </div>
+          <div class="analytics-chart-panel glass-panel">
+            <h4>Daily Active Student Engagements</h4>
+            <div id="admin-chart-engagement" class="chart-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin View: Settings -->
+      <section id="admin-view-settings" class="admin-view-section" hidden>
+        <div class="admin-settings-card glass-panel">
+          <h3>System & Term Configuration</h3>
+          <div class="form-row-2">
+            <div class="form-group"><label>Academic Term</label><input class="glass-input" value="Autumn Semester 2026"></div>
+            <div class="form-group"><label>Target CSE Batch</label><input class="glass-input" value="Batch 2024-2028 (3rd Year)"></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group"><label>Attendance Warning Cutoff</label><input class="glass-input" type="number" value="75"></div>
+            <div class="form-group"><label>Default Quest XP Reward</label><input class="glass-input" type="number" value="100"></div>
+          </div>
+          <button class="glow-action-btn btn-primary-grind btn-compact mt-2" onclick="alert('Settings saved successfully!')">Save Configuration</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Admin Modal Dialog Container -->
+  <div id="admin-modal" class="modal-backdrop" hidden style="display: none;">
+    <div class="modal-card glass-panel admin-modal-card">
+      <div class="modal-header">
+        <h3 id="admin-modal-title" class="font-arcade">Admin Action</h3>
+        <button id="admin-modal-close-btn" class="modal-close-icon">&times;</button>
+      </div>
+      <div id="admin-modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MAIN DASHBOARD APPLICATION CONTAINER (STUDENT PORTAL)
+       ======================================================================== -->
+  <div id="main-app" class="app-container" style="display: none;">
+    
+    <!-- Top Active Urgent Alert Banner (Pushed by Admin) -->
+    <div id="active-alert-banner" class="emergency-alert-banner" style="display: none;">
+      <div class="banner-pulse-dot"></div>
+      <span class="banner-icon">🚨</span>
+      <span class="banner-text" id="alert-banner-message">Campus WiFi Maintenance tonight at 11 PM.</span>
+      <button id="dismiss-alert-btn" class="banner-dismiss" title="Dismiss Alert">&times;</button>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="main-header glass-panel">
+      <div class="header-brand">
+        <div class="logo-emblem">
+          <svg class="icon-sword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="14.5 17.5 3 6 3 3 6 3 17.5 14.5 14.5 17.5" fill="rgba(138, 43, 226, 0.4)"></polygon>
+            <line x1="13" y1="19" x2="19" y2="13"></line>
+            <line x1="16" y1="16" x2="20" y2="20"></line>
+            <line x1="19" y1="21" x2="21" y2="19"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">QuestLog <span class="brand-tag">Student OS</span></h1>
+          <span class="brand-subtitle">AI &bull; Academics &bull; Communication &bull; Gamified Focus</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Operator Identity Tag -->
+        <div class="header-stat-pill operator-badge" title="Active Student">
+          <span class="pill-icon">🎮</span>
+          <span class="pill-value font-arcade" id="header-gamertag-val">OPERATOR</span>
+        </div>
+
+        <!-- Level & XP Mini Header Display -->
+        <div class="header-stat-pill xp-pill" title="Player Progression">
+          <span class="pill-icon">⭐</span>
+          <span class="font-arcade" id="header-level-val">LVL 1</span>
+        </div>
+
+        <!-- Streak Indicator Pill -->
+        <div class="header-stat-pill streak-pill" title="Daily Activity Streak">
+          <span class="pill-icon">🔥</span>
+          <span class="font-arcade" id="header-streak-val">1d</span>
+        </div>
+
+        <!-- Smart Reminders & Notifications Bell -->
+        <div class="header-dropdown-wrap">
+          <button id="reminders-bell-btn" class="glass-btn btn-icon-only position-relative" aria-label="Smart Reminders" title="Smart Reminders & Notifications">
+            <span class="btn-icon">🔔</span>
+            <span class="notification-badge" id="reminders-badge-count" style="display: none;">0</span>
+          </button>
+          
+          <!-- Dropdown Drawer for Notifications -->
+          <div id="reminders-dropdown" class="reminders-dropdown glass-panel" style="display: none;">
+            <div class="dropdown-header">
+              <strong class="font-arcade">🔔 SMART REMINDERS & ALERTS</strong>
+              <button id="clear-reminders-btn" class="text-action-btn">Dismiss All</button>
+            </div>
+            <div id="reminders-dropdown-list" class="reminders-list"></div>
+          </div>
+        </div>
+
+        <!-- Sound FX Switch -->
+        <button id="sound-toggle-btn" class="glass-btn btn-icon-only" aria-label="Toggle Sound Effects" title="Toggle Sound FX">
+          <span id="sound-icon" class="btn-icon">🔊</span>
+          <span class="btn-text-sr">Sound</span>
+        </button>
+
+        <!-- Dynamic Level Theme Switcher/Indicator -->
+        <button id="theme-toggle-btn" class="glass-btn btn-theme-badge" title="Dynamic Level Theme">
+          <span class="btn-icon">🎨</span>
+          <span class="font-arcade" id="theme-badge-text">ROOKIE THEME</span>
+        </button>
+
+        <!-- Switch Operator / Logout -->
+        <button id="logout-btn" class="glass-btn btn-compact" title="Switch Operator / Log Out">
+          <span class="btn-icon">🚪</span>
+          <span class="btn-label">Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- QUESTLOG PRIMARY COMMAND NAVIGATION RIBBON -->
+    <nav class="questlog-nav glass-panel" aria-label="QuestLog sections">
+      <button class="nav-tab active" data-page="dashboard"><span class="nav-emoji">⚔️</span> Dashboard</button>
+      <button class="nav-tab" data-page="pulse"><span class="nav-emoji">📱</span> Pulse</button>
+      <button class="nav-tab" data-page="brain"><span class="nav-emoji">🔎</span> College Brain</button>
+      <button class="nav-tab" data-page="skilltree"><span class="nav-emoji">🗺️</span> Skill Tree</button>
+      <button class="nav-tab" data-page="calendar"><span class="nav-emoji">🗓️</span> Calendar</button>
+      <button class="nav-tab" data-page="shop"><span class="nav-emoji">🎁</span> XP Shop</button>
+      <button class="nav-tab" data-page="world"><span class="nav-emoji">🎮</span> Campus World</button>
+      <button class="nav-tab" data-page="focus"><span class="nav-emoji">⏱️</span> Focus Mode</button>
+      <button class="nav-tab" data-page="teamfinder"><span class="nav-emoji">👥</span> Team Finder</button>
+      <button class="nav-tab" data-page="studygroups"><span class="nav-emoji">👥</span> Study Groups</button>
+      <button class="nav-tab" data-page="resources"><span class="nav-emoji">📚</span> Resource Vault</button>
+      <button class="nav-tab" data-page="semester"><span class="nav-emoji">📊</span> Semester Center</button>
+      <button class="nav-tab" data-page="github"><span class="nav-emoji">💻</span> GitHub</button>
+      <button class="nav-tab" data-page="weekly"><span class="nav-emoji">📅</span> Weekly Tasks</button>
+      <button class="nav-tab" data-page="analytics"><span class="nav-emoji">📈</span> Analytics</button>
+      <button class="nav-tab" data-page="portfolio"><span class="nav-emoji">🪪</span> Portfolio</button>
+      <button class="nav-tab" data-page="leaderboard"><span class="nav-emoji">👑</span> Leaderboard</button>
+      <button class="nav-tab" data-page="guilds"><span class="nav-emoji">🛡️</span> Guilds</button>
+    </nav>
+
+    <!-- ======================================================================
+         PAGE 1: STUDENT MAIN DASHBOARD
+         ====================================================================== -->
+    <!-- Hero Intelligence Section: "WHAT SHOULD I DO NOW?" & "FOR YOU" -->
+    <section class="page-section page-dashboard dashboard-hero-grid" aria-label="Student Intelligence Hub">
+      <!-- ⚡ FEATURE 19: WHAT SHOULD I DO NOW? -->
+      <div class="hero-card what-to-do-card glass-panel" id="hero-what-to-do-card">
+        <div class="what-to-do-header">
+          <div class="section-badge emerald">
+            <span class="badge-dot"></span>
+            <span>INTELLIGENCE RADAR</span>
+          </div>
+          <span class="time-free-chip font-mono" id="free-time-indicator">⏱️ 47 mins free right now</span>
+        </div>
+        <div class="what-to-do-body">
+          <h2 class="what-to-do-title font-arcade">⚡ WHAT SHOULD I DO NOW?</h2>
+          <p class="what-to-do-desc" id="what-to-do-subtext">Optimal high-impact micro-plan based on deadlines, exams, and skill gaps.</p>
+          <div class="smart-plan-breakdown" id="smart-plan-breakdown">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+        <div class="what-to-do-footer">
+          <span class="potential-xp font-arcade" id="smart-plan-potential-xp">+175 XP POTENTIAL</span>
+          <button id="start-smart-session-btn" class="glow-action-btn btn-primary-grind">
+            <span class="btn-pulse" aria-hidden="true"></span>
+            <span class="btn-icon">⚡</span>
+            <span>START SESSION</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 🎯 FEATURE 7: PERSONAL RECOMMENDATIONS ("FOR YOU") -->
+      <div class="hero-card for-you-card glass-panel" id="hero-for-you-card">
+        <div class="for-you-header">
+          <div class="section-badge purple">
+            <span class="badge-dot"></span>
+            <span>FOR YOU</span>
+          </div>
+          <span class="sub-text">Contextual actions based on your student record</span>
+        </div>
+        <div class="for-you-grid" id="for-you-recommendations-grid">
+          <!-- Dynamically populated with actionable cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Character Studio & The Vault (Inventory) -->
+    <section class="page-section page-dashboard character-studio-section glass-panel" aria-label="Character Studio and Vault">
+      <div class="studio-grid">
+        <!-- LEFT: Dynamic 3D Operative Stage Canvas -->
+        <div class="avatar-stage-column">
+          <div class="stage-header">
+            <div class="section-badge">
+              <span class="badge-dot"></span>
+              <span>BATTLE ROYALE STUDIO</span>
+            </div>
+            <div class="character-title-wrap">
+              <h2 class="character-gamertag font-arcade" id="studio-gamertag">OPERATOR</h2>
+              <span class="character-rank-pill" id="player-rank-title">Novice Apprentice</span>
+            </div>
+          </div>
+
+          <!-- The Avatar Stage with Cyber Pedestal & 3D Three.js Canvas -->
+          <div class="avatar-canvas-wrapper">
+            <div class="pedestal-glow" id="pedestal-3d-glow" aria-hidden="true"></div>
+            
+            <!-- 3D WebGL Operative Canvas (Three.js) -->
+            <canvas id="character-3d-canvas" class="character-3d-canvas"></canvas>
+
+            <!-- 3D Viewport Controls & Victory Trigger -->
+            <div class="canvas-3d-controls-overlay">
+              <div class="canvas-3d-hint font-arcade">
+                <span class="hint-icon">🔄</span> Drag to rotate &bull; 🔍 Scroll to inspect
+              </div>
+              <div class="canvas-3d-actions-row">
+                <button id="btn-trigger-victory" class="glass-btn btn-victory-pose" title="Trigger Operative Victory Celebration">
+                  <span class="btn-icon">⚡</span>
+                  <span class="font-arcade">VICTORY POSE</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Level Floating Badge in Stage -->
+            <div class="stage-level-badge" id="player-level-badge">LVL 1</div>
+          </div>
+
+          <!-- XP Progression Bar -->
+          <div class="xp-bar-container studio-xp-block">
+            <div class="xp-header-info">
+              <span class="xp-label font-arcade">XP PROGRESSION</span>
+              <span class="xp-numbers font-mono"><strong id="current-xp-display">0</strong> / <span id="max-xp-display">500</span> XP</span>
+            </div>
+            <div class="xp-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="500" id="xp-progressbar">
+              <div class="xp-fill" id="xp-fill-bar" style="width: 0%;">
+                <div class="xp-shimmer"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats Ribbon -->
+          <div class="player-metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon">⚔️</div>
+              <div class="metric-data">
+                <span class="metric-value" id="stat-completed-quests">0</span>
+                <span class="metric-label">Bounties Cleared</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">⏱️</div>
+              <div class="metric-data">
+                <span class="metric-value" id="stat-focus-time">0m</span>
+                <span class="metric-label">Grind Minutes</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">🏆</div>
+              <div class="metric-data">
+                <span class="metric-value" id="stat-total-xp">0</span>
+                <span class="metric-label">Total XP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: The Vault (Inventory & Equipment Matrix) -->
+        <div class="vault-column">
+          <div class="vault-header-wrap">
+            <div class="vault-title-group">
+              <div class="section-badge purple">
+                <span class="badge-dot"></span>
+                <span>INVENTORY & 3D STUDIO</span>
+              </div>
+              <h3 class="vault-title">The Vault</h3>
+            </div>
+            <div class="vault-loadout-stats">
+              <span class="loadout-label">Equipped Loadout:</span>
+              <span class="loadout-value font-mono" id="vault-equipped-count">4 / 4</span>
+            </div>
+          </div>
+
+          <!-- Dynamic 3D Operative Vibe Selector -->
+          <div class="vibe-matrix-bar glass-panel-nested">
+            <span class="vibe-bar-label font-arcade">🎨 3D OPERATIVE VIBE:</span>
+            <div class="vibe-pills-wrap" id="vibe-pills-container" role="radiogroup" aria-label="3D Operative Vibe">
+              <button class="vibe-pill active" data-vibe="neon-strike" title="Neon Strike: Electric cyan & magenta cyber armor">
+                <span class="vibe-color-indicator vibe-neon-strike"></span>
+                <span>Neon Strike</span>
+              </button>
+              <button class="vibe-pill" data-vibe="charcoal-stealth" title="Charcoal Stealth: Matte tactical carbon fiber & gunmetal">
+                <span class="vibe-color-indicator vibe-charcoal-stealth"></span>
+                <span>Charcoal Stealth</span>
+              </button>
+              <button class="vibe-pill" data-vibe="crimson-overlord" title="Crimson Overlord: Obsidian battle plates & crimson red glow">
+                <span class="vibe-color-indicator vibe-crimson-overlord"></span>
+                <span>Crimson Overlord</span>
+              </button>
+              <button class="vibe-pill" data-vibe="cyber-gold" title="Cyber Gold: Mirror-polished gold chrome & royal purple">
+                <span class="vibe-color-indicator vibe-cyber-gold"></span>
+                <span>Cyber Gold</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Vault Category Filter Tabs -->
+          <div class="vault-tabs-row" role="tablist">
+            <button class="vault-tab-btn active" data-filter="all" role="tab" aria-selected="true">All Equipment</button>
+            <button class="vault-tab-btn" data-filter="head" role="tab" aria-selected="false">👑 Headgear</button>
+            <button class="vault-tab-btn" data-filter="torso" role="tab" aria-selected="false">🥋 Torso</button>
+            <button class="vault-tab-btn" data-filter="weapon" role="tab" aria-selected="false">🔫 Weapons</button>
+            <button class="vault-tab-btn" data-filter="accessory" role="tab" aria-selected="false">✨ Relic / Pet</button>
+          </div>
+
+          <!-- Equipment Grid Container -->
+          <div class="vault-items-grid" id="vault-items-grid" role="list"></div>
+
+          <!-- Selected Item Inspection Lore Box -->
+          <div class="vault-inspect-card" id="vault-inspect-card">
+            <div class="inspect-icon-frame" id="inspect-icon-frame">
+              <span id="inspect-item-icon">👑</span>
+            </div>
+            <div class="inspect-meta">
+              <div class="inspect-top-line">
+                <h4 class="inspect-name font-arcade" id="inspect-item-name">Hacker's Crown</h4>
+                <span class="inspect-rarity-tag" id="inspect-item-rarity">LEGENDARY</span>
+              </div>
+              <p class="inspect-desc" id="inspect-item-desc">A blazing golden cybernetic tiara awarded only to elite coders who have mastered memory allocation and low-level protocols.</p>
+              <div class="inspect-action-line">
+                <span class="inspect-requirement" id="inspect-item-req">Unlocks at Level 5</span>
+                <button id="inspect-equip-btn" class="glass-btn btn-accent-glow inspect-btn">Equip Gear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Consistency Tracker & Streak Matrix -->
+    <section class="page-section page-dashboard consistency-section glass-panel" aria-label="Streak and Consistency Tracker">
+      <div class="consistency-header">
+        <div class="consistency-title-wrap">
+          <div class="section-badge emerald">
+            <span class="badge-dot"></span>
+            <span>CONSISTENCY MATRIX</span>
+          </div>
+          <h2 class="consistency-heading">Streak & Activity Tracker</h2>
+        </div>
+        <button id="claim-daily-btn" class="glass-btn btn-daily-reward">
+          <span class="btn-icon">🎁</span>
+          <span>Claim Daily Bounty (+50 XP)</span>
+        </button>
+      </div>
+
+      <div class="consistency-body">
+        <div class="streak-hero-card">
+          <div class="streak-flame-icon">🔥</div>
+          <div class="streak-text-wrap">
+            <div class="streak-number font-arcade" id="streak-counter-number">1</div>
+            <span class="streak-label font-arcade">DAYS ACTIVE STREAK</span>
+            <p class="streak-cheer" id="streak-cheer-text">Keep the flame alive! Complete a quest or focus session today.</p>
+          </div>
+        </div>
+
+        <div class="contribution-matrix-card">
+          <div class="matrix-label-row">
+            <span class="matrix-title font-arcade">7-DAY ACTIVITY HEATMAP</span>
+            <span class="matrix-rate font-mono" id="matrix-active-rate">Consistency: 100%</span>
+          </div>
+
+          <div class="contribution-blocks-row" id="contribution-blocks-row"></div>
+
+          <div class="matrix-legend">
+            <span class="legend-text">Less Active</span>
+            <div class="legend-scale">
+              <span class="legend-box level-0"></span>
+              <span class="legend-box level-1"></span>
+              <span class="legend-box level-2"></span>
+              <span class="legend-box level-3"></span>
+            </div>
+            <span class="legend-text">Combat Trance</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Arena & The Quest Board Workspace -->
+    <main class="page-section page-dashboard dashboard-main-grid">
+      <!-- The Arena: Pomodoro Grind Engine -->
+      <section class="arena-section glass-panel" aria-label="The Arena Focus Timer">
+        <div class="section-badge">
+          <span class="badge-dot"></span>
+          <span>THE ARENA</span>
+        </div>
+        
+        <div class="arena-header">
+          <h2 class="arena-title">Combat Focus Engine</h2>
+          <p class="arena-subtitle">Enter deep work trance. Survive the countdown to earn +150 XP bonus.</p>
+        </div>
+
+        <div class="timer-mode-selector" role="tablist">
+          <button class="mode-btn active" data-mode="pomodoro" data-time="1500" role="tab" aria-selected="true">
+            <span class="mode-icon">⚡</span> Deep Grind (25m)
+          </button>
+          <button class="mode-btn" data-mode="deepGrind" data-time="3000" role="tab" aria-selected="false">
+            <span class="mode-icon">⚔️</span> Boss Grind (50m)
+          </button>
+          <button class="mode-btn" data-mode="shortBreak" data-time="300" role="tab" aria-selected="false">
+            <span class="mode-icon">🧪</span> Mana Rest (5m)
+          </button>
+          <button class="mode-btn" data-mode="longBreak" data-time="900" role="tab" aria-selected="false">
+            <span class="mode-icon">🛡️</span> Tavern (15m)
+          </button>
+        </div>
+
+        <div class="timer-circle-wrapper">
+          <svg class="timer-svg" viewBox="0 0 280 280">
+            <defs>
+              <linearGradient id="timerRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00d2ff" />
+                <stop offset="50%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#8a2be2" />
+              </linearGradient>
+            </defs>
+            <circle class="timer-ring-bg" cx="140" cy="140" r="118" />
+            <circle class="timer-ring-progress" id="timer-progress-ring" cx="140" cy="140" r="118" />
+          </svg>
+
+          <div class="timer-content">
+            <div class="timer-state-indicator" id="timer-state-label">READY FOR BATTLE</div>
+            <div class="timer-digits font-arcade" id="timer-display">25:00</div>
+            <div class="timer-reward-tag"><span>+150 XP ON CLEAR</span></div>
+          </div>
+        </div>
+
+        <div class="arena-controls">
+          <button id="timer-toggle-btn" class="glow-action-btn btn-primary-grind">
+            <span class="btn-pulse" aria-hidden="true"></span>
+            <span id="timer-btn-icon" class="btn-icon">⚔️</span>
+            <span id="timer-btn-label">Start Grind</span>
+          </button>
+          
+          <div class="sub-controls">
+            <button id="timer-reset-btn" class="glass-btn btn-compact" title="Reset Timer"><span class="btn-icon">↺</span><span>Reset</span></button>
+            <button id="timer-skip-btn" class="glass-btn btn-compact" title="Claim Victory"><span class="btn-icon">⏩</span><span>Claim Cleared</span></button>
+          </div>
+        </div>
+
+        <div class="grind-status-banner" id="grind-status-banner">
+          <span class="banner-badge">STATUS</span>
+          <span class="banner-text" id="status-banner-text">Standby. Press "Start Grind" to initiate timer.</span>
+        </div>
+      </section>
+
+      <!-- The Quest Board Section (Unified Quest Engine Consumer) -->
+      <section class="quest-section glass-panel" aria-label="The Quest Board">
+        <div class="quest-section-header">
+          <div class="section-title-wrap">
+            <div class="section-badge purple">
+              <span class="badge-dot"></span>
+              <span>UNIFIED BOUNTY BOARD</span>
+            </div>
+            <h2 class="quest-section-title">The Quest Board</h2>
+          </div>
+
+          <button id="toggle-add-quest-btn" class="glass-btn btn-accent-glow" aria-expanded="false">
+            <span class="btn-icon">➕</span>
+            <span>Summon Quest</span>
+          </button>
+        </div>
+
+        <!-- Collapsible Add Quest Drawer -->
+        <div id="add-quest-drawer" class="add-quest-drawer" hidden style="display: none;">
+          <form id="new-quest-form" class="new-quest-form">
+            <div class="form-row">
+              <input 
+                type="text" 
+                id="quest-input-title" 
+                class="glass-input" 
+                placeholder="Name your quest (e.g. Master Binary Search Trees)..." 
+                required 
+                maxlength="120"
+                autocomplete="off"
+              >
+            </div>
+            <div class="form-bottom-row">
+              <div class="difficulty-picker">
+                <label for="quest-difficulty-select" class="form-label">Tier & Bounty:</label>
+                <select id="quest-difficulty-select" class="glass-select">
+                  <option value="normal" data-xp="100">⚔️ Veteran (+100 XP)</option>
+                  <option value="easy" data-xp="50">🌱 Apprentice (+50 XP)</option>
+                  <option value="boss" data-xp="250">🐉 Boss Quest (+250 XP)</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button type="button" id="cancel-add-quest-btn" class="glass-btn btn-compact">Cancel</button>
+                <button type="submit" class="glass-btn btn-glow-purple">Enlist Bounty</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2-Column Board: Active & Completed -->
+        <div class="quest-columns-container">
+          <div class="quest-column active-column">
+            <div class="column-header">
+              <div class="col-title-group">
+                <span class="col-badge active-badge">ACTIVE</span>
+                <h3 class="col-heading">Active Quests</h3>
+              </div>
+              <span class="quest-count-badge" id="active-quests-count">0</span>
+            </div>
+            <div class="quest-cards-list" id="active-quests-list" role="list"></div>
+          </div>
+
+          <div class="quest-column completed-column">
+            <div class="column-header">
+              <div class="col-title-group">
+                <span class="col-badge complete-badge">VICTORIES</span>
+                <h3 class="col-heading">Completed</h3>
+              </div>
+              <div class="completed-col-actions">
+                <span class="quest-count-badge" id="completed-quests-count">0</span>
+                <button id="clear-completed-btn" class="text-action-btn" title="Clear completed archive">Clear</button>
+              </div>
+            </div>
+            <div class="quest-cards-list" id="completed-quests-list" role="list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================================
+         FEATURE 3: QUESTLOG PULSE (WHATSAPP & COMMUNICATION AI EXTRACTOR)
+         ====================================================================== -->
+    <section id="page-pulse" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>COMMUNICATION INTELLIGENCE</span></div>
+          <h2>QuestLog Pulse</h2>
+          <p>Converts flooded WhatsApp groups, Discord & college notices into actionable Quests, Reminders and Calendar Events.</p>
+        </div>
+        <div class="pulse-status-badge">⚡ AI PARSER READY</div>
+      </div>
+
+      <div class="pulse-container-grid">
+        <!-- Left: Input & Simulators -->
+        <div class="pulse-input-card glass-panel">
+          <h3>📥 Paste or Upload Communication</h3>
+          <p class="sub-text">Paste message from WhatsApp class group or upload exported text file:</p>
+          
+          <textarea id="pulse-input-text" class="glass-textarea" rows="4" placeholder="e.g. 'Guys DBMS assignment 3 is due Friday 11:59 PM. Submit on Moodle.'"></textarea>
+
+          <div class="pulse-upload-row">
+            <label for="pulse-file-upload" class="glass-btn btn-compact file-label">
+              <span>📄 Upload Chat Export (.txt)</span>
+              <input type="file" id="pulse-file-upload" accept=".txt" style="display:none;">
+            </label>
+            <button id="btn-parse-pulse-text" class="glow-action-btn btn-primary-grind">
+              <span>🤖 Run AI Extraction</span>
+            </button>
+          </div>
+
+          <div class="pulse-sim-chips">
+            <span class="sub-text">Simulate Real College Messages:</span>
+            <button class="pulse-chip" data-msg="Guys DBMS assignment 3 is due Friday 11:59 PM. Submit on Moodle.">📚 DBMS Assignment</button>
+            <button class="pulse-chip" data-msg="Operating Systems mid-term scheduled for Oct 12 at 2:00 PM in Hall 304. Syllabus covers up to Deadlocks.">📝 OS Mid-Term</button>
+            <button class="pulse-chip" data-msg="Notice: Tomorrow's Computer Networks lecture shifted to Room 402 at 2:00 PM due to seminar hall booking.">🚪 CN Room Shift</button>
+            <button class="pulse-chip" data-msg="HackAIT 2026 registrations are live! 36-hour national hackathon on Oct 24. Rs 2 Lakh prize pool.">🚀 HackAIT Hackathon</button>
+          </div>
+        </div>
+
+        <!-- Right: AI Extraction Output & Actions -->
+        <div class="pulse-output-card glass-panel">
+          <div class="output-header">
+            <h3>⚡ Structured Intelligence & Actions</h3>
+            <span class="badge-mini" id="pulse-extract-count">Parsed Entity</span>
+          </div>
+
+          <div id="pulse-extracted-card" class="pulse-result-box">
+            <div class="empty-state">
+              <span>💬</span>
+              <p>Paste a message or click a simulated announcement to trigger AI understanding.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live College Communication Feed (synced from Admin) -->
+      <div class="pulse-feed-section glass-panel mt-3">
+        <div class="feed-header">
+          <h3>📢 Official College Communication Stream</h3>
+          <span class="sub-text">Live official broadcasts from faculty, exam cell, and clubs</span>
+        </div>
+        <div id="pulse-communication-feed" class="pulse-feed-grid"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 4: COLLEGE BRAIN SEARCH
+         ====================================================================== -->
+    <section id="page-brain" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge purple"><span class="badge-dot"></span><span>COLLEGE KNOWLEDGE LAYER</span></div>
+          <h2>College Brain Search</h2>
+          <p>Instant natural language answers synthesized from all notices, syllabus, assignments, exams, and communication.</p>
+        </div>
+      </div>
+
+      <div class="brain-search-card glass-panel">
+        <div class="brain-search-box">
+          <span class="search-icon">🔎</span>
+          <input type="text" id="brain-search-input" class="brain-input" placeholder="Ask anything: 'When is DBMS assignment 3 due?', 'What exams next week?', 'Any room changes?'...">
+          <button id="brain-search-btn" class="glow-action-btn btn-primary-grind">Search Brain</button>
+        </div>
+
+        <div class="brain-prompt-chips">
+          <span class="sub-text">Try asking:</span>
+          <button class="brain-chip" data-query="When is DBMS Assignment 3 due?">When is DBMS Assignment 3 due?</button>
+          <button class="brain-chip" data-query="What exams do I have next week?">What exams do I have next week?</button>
+          <button class="brain-chip" data-query="Did any professor mention a room change?">Did any professor mention a room change?</button>
+          <button class="brain-chip" data-query="What events are tomorrow?">What events are tomorrow?</button>
+          <button class="brain-chip" data-query="Show me messages about the hackathon.">Show me messages about the hackathon.</button>
+        </div>
+      </div>
+
+      <div id="brain-search-results" class="brain-results-container">
+        <!-- Dynamically rendered -->
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 5: CAREER SKILL TREE
+         ====================================================================== -->
+    <section id="page-skilltree" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>COMPETENCY PROGRESSION</span></div>
+          <h2>Career Skill Tree</h2>
+          <p>Interactive mastery visualizer. Completing bounties and practice clears nodes across 7 core tech disciplines.</p>
+        </div>
+        <div class="skill-track-tabs" id="skill-track-tabs">
+          <button class="skill-tab active" data-track="swe">💻 Software Dev</button>
+          <button class="skill-tab" data-track="aiml">🤖 AI / ML</button>
+          <button class="skill-tab" data-track="cyber">🛡️ Cybersecurity</button>
+          <button class="skill-tab" data-track="gamedev">🎮 Game Dev</button>
+          <button class="skill-tab" data-track="datasci">📊 Data Science</button>
+          <button class="skill-tab" data-track="cp">⚡ Comp. Programming</button>
+          <button class="skill-tab" data-track="startup">🚀 Entrepreneurship</button>
+        </div>
+      </div>
+
+      <div class="skilltree-layout">
+        <!-- Interactive Graph View -->
+        <div class="skilltree-canvas-panel glass-panel">
+          <div class="tree-header-info">
+            <h3 id="current-track-name" class="font-arcade">Software Development Track</h3>
+            <span id="current-track-progress" class="font-mono">Progress: 2 / 9 Mastered</span>
+          </div>
+          <div id="skilltree-nodes-container" class="skilltree-nodes-wrapper">
+            <!-- Dynamic nodes & SVG connector lines -->
+          </div>
+        </div>
+
+        <!-- Node Inspection Side Panel -->
+        <div class="skilltree-details-panel glass-panel" id="skill-node-inspector">
+          <div class="empty-state">
+            <span>🗺️</span>
+            <p>Select any skill node on the tree to inspect prerequisites, related quests, and learning resources.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 6: QUESTLOG XP SHOP
+         ====================================================================== -->
+    <section id="page-shop" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge gold"><span class="badge-dot"></span><span>COSMETIC ARMORY</span></div>
+          <h2>QuestLog XP Shop</h2>
+          <p>Spend your legitimately grinded XP on cosmetic skins, crowns, titles, and 3D character shaders. Strictly zero pay-to-win.</p>
+        </div>
+        <div class="shop-wallet-pill glass-panel">
+          <span class="wallet-icon">💎</span>
+          <span>XP WALLET: <strong id="shop-wallet-val" class="font-mono">0</strong> XP</span>
+        </div>
+      </div>
+
+      <div class="shop-filter-bar glass-panel">
+        <button class="shop-filter active" data-category="all">All Items</button>
+        <button class="shop-filter" data-category="head">👑 Headgear</button>
+        <button class="shop-filter" data-category="torso">🥋 Cyber Armor</button>
+        <button class="shop-filter" data-category="weapon">🔫 Weapons</button>
+        <button class="shop-filter" data-category="accessory">✨ Relics & Pets</button>
+        <button class="shop-filter" data-category="title">🏅 Titles</button>
+      </div>
+
+      <div id="shop-items-grid" class="shop-catalog-grid">
+        <!-- Dynamically rendered with prices & equip states -->
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 20: QUESTLOG WORLD (CAMPUS WORLD WITH 3D CHARACTER)
+         ====================================================================== -->
+    <section id="page-world" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>CAMPUS METAVERSE</span></div>
+          <h2>QuestLog World</h2>
+          <p>Navigate the cybernetic university campus. Each sector teleports your operative to academic and community sectors.</p>
+        </div>
+      </div>
+
+      <div class="campus-world-layout">
+        <!-- Isometric Campus Map Grid -->
+        <div class="campus-map-grid glass-panel">
+          <div class="campus-zone-card" data-teleport="dashboard">
+            <div class="zone-icon">🏫</div>
+            <div class="zone-info">
+              <h4>University Hall</h4>
+              <span>Academics, Assignments & Dashboard</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="resources">
+            <div class="zone-icon">📚</div>
+            <div class="zone-info">
+              <h4>Grand Library</h4>
+              <span>Resource Vault, Notes & PYQs</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="skilltree">
+            <div class="zone-icon">💻</div>
+            <div class="zone-info">
+              <h4>Coding Lab</h4>
+              <span>DSA Mastery, GitHub & Career Trees</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="focus">
+            <div class="zone-icon">🏆</div>
+            <div class="zone-info">
+              <h4>The Arena</h4>
+              <span>Deep Focus Mode & Weekly Bounties</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="teamfinder">
+            <div class="zone-icon">👥</div>
+            <div class="zone-info">
+              <h4>Club Center</h4>
+              <span>Study Groups & Team Finder</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="portfolio">
+            <div class="zone-icon">💼</div>
+            <div class="zone-info">
+              <h4>Career Center</h4>
+              <span>Portfolio, Resumes & Hackathons</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="brain">
+            <div class="zone-icon">🤖</div>
+            <div class="zone-info">
+              <h4>AI Cyber Core</h4>
+              <span>College Brain & QuestLog AI</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+
+          <div class="campus-zone-card" data-teleport="shop">
+            <div class="zone-icon">🎁</div>
+            <div class="zone-info">
+              <h4>The XP Bazaar</h4>
+              <span>Cosmetics, Armors & Skins</span>
+            </div>
+            <button class="glass-btn btn-compact">Teleport &rarr;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 9: SMART CALENDAR
+         ====================================================================== -->
+    <section id="page-calendar" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge"><span class="badge-dot"></span><span>ACADEMIC SCHEDULE</span></div>
+          <h2>Smart Calendar</h2>
+          <p>Unifies classes, exams, assignments, club events and personal reminders with real-time conflict detection.</p>
+        </div>
+        <div class="calendar-controls">
+          <div class="calendar-view-toggle">
+            <button class="cal-view-btn active" data-view="month">Month</button>
+            <button class="cal-view-btn" data-view="week">Week</button>
+            <button class="cal-view-btn" data-view="day">Day</button>
+          </div>
+          <button id="add-calendar-event-btn" class="glow-action-btn btn-primary-grind btn-compact">➕ Add Event</button>
+        </div>
+      </div>
+
+      <!-- Schedule Conflict Warning Banner -->
+      <div id="calendar-conflict-alert" class="calendar-conflict-banner" style="display: none;">
+        <span>⚠️</span>
+        <div class="conflict-text">
+          <strong>Schedule Conflict Detected!</strong>
+          <span id="conflict-desc">"Computer Networks Lecture" overlaps with "Python Workshop" at 2:00 PM.</span>
+        </div>
+      </div>
+
+      <div class="calendar-wrapper glass-panel">
+        <div class="calendar-nav-bar">
+          <button id="cal-prev-btn" class="glass-btn btn-compact">&larr; Prev</button>
+          <h3 id="calendar-month-heading" class="font-arcade">October 2026</h3>
+          <button id="cal-next-btn" class="glass-btn btn-compact">Next &rarr;</button>
+        </div>
+        <div id="calendar-grid" class="calendar-days-grid"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 10: FOCUS MODE (DEDICATED DEEP WORK ARENA)
+         ====================================================================== -->
+    <section id="page-focus" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge purple"><span class="badge-dot"></span><span>COGNITIVE TRANCE</span></div>
+          <h2>Dedicated Focus Mode</h2>
+          <p>Bind any active bounty to a timed session. Clears bounties upon countdown survival with full XP rewards.</p>
+        </div>
+      </div>
+
+      <div class="deep-focus-arena glass-panel">
+        <div class="focus-bind-row">
+          <label>Target Bounty to Grind:</label>
+          <select id="focus-quest-select" class="glass-select">
+            <option value="">-- Select Active Quest to Bind --</option>
+          </select>
+        </div>
+
+        <div class="focus-presets-row">
+          <button class="focus-preset-btn active" data-mins="25">⚡ 25 Min Pomodoro</button>
+          <button class="focus-preset-btn" data-mins="50">⚔️ 50 Min Deep Grind</button>
+          <button class="focus-preset-btn" data-mins="15">🧪 15 Min Sprint</button>
+          <div class="custom-time-wrap">
+            <input type="number" id="focus-custom-mins" class="glass-input custom-min-input" placeholder="Mins" min="1" max="180">
+            <button id="set-custom-focus-btn" class="glass-btn btn-compact">Set</button>
+          </div>
+        </div>
+
+        <div class="focus-timer-display-huge font-arcade" id="deep-focus-digits">25:00</div>
+        
+        <div class="focus-actions-row">
+          <button id="deep-focus-toggle-btn" class="glow-action-btn btn-primary-grind btn-large">
+            <span>⚔️ Engage Focus Trance</span>
+          </button>
+          <button id="deep-focus-reset-btn" class="glass-btn">Reset</button>
+        </div>
+
+        <div class="focus-stats-strip">
+          <div class="stat-mini"><span>Session XP</span><strong id="focus-session-xp">+150 XP</strong></div>
+          <div class="stat-mini"><span>Focus Minutes Today</span><strong id="focus-session-minutes">0m</strong></div>
+          <div class="stat-mini"><span>Trance State</span><strong id="focus-session-state">Standby</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 11: TEAM FINDER
+         ====================================================================== -->
+    <section id="page-teamfinder" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>SQUAD COLLABORATION</span></div>
+          <h2>QuestLog Team Finder</h2>
+          <p>Find complementary teammates for hackathons, course projects, research, and startup ventures.</p>
+        </div>
+        <button id="create-team-post-btn" class="glow-action-btn btn-primary-grind btn-compact">➕ Post Team Vacancy</button>
+      </div>
+
+      <div class="teamfinder-filter-bar glass-panel">
+        <input type="text" id="team-search-input" class="glass-input" placeholder="Filter by skill (e.g. React, Three.js, Python, ML)...">
+        <select id="team-purpose-filter" class="glass-select">
+          <option value="all">All Goals</option>
+          <option value="hackathon">Hackathon</option>
+          <option value="project">Course Project</option>
+          <option value="startup">Startup Idea</option>
+          <option value="research">Research Paper</option>
+        </select>
+      </div>
+
+      <div id="teamfinder-profiles-grid" class="teamfinder-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 14: STUDY GROUPS
+         ====================================================================== -->
+    <section id="page-studygroups" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge purple"><span class="badge-dot"></span><span>COLLABORATIVE SYNERGY</span></div>
+          <h2>Study Groups & Squads</h2>
+          <p>Join or create peer groups with shared collective goals, group progress, and shared leaderboards.</p>
+        </div>
+        <button id="create-study-group-btn" class="glow-action-btn btn-primary-grind btn-compact">➕ Form Study Group</button>
+      </div>
+
+      <div id="studygroups-list-grid" class="studygroups-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 15: RESOURCE VAULT
+         ====================================================================== -->
+    <section id="page-resources" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge"><span class="badge-dot"></span><span>ACADEMIC ARCHIVE</span></div>
+          <h2>Resource Vault</h2>
+          <p>Curated semester notes, previous year question papers (PYQs), video playlists, and formula cheat sheets.</p>
+        </div>
+      </div>
+
+      <div class="resource-vault-filters glass-panel">
+        <input type="text" id="vault-resource-search" class="glass-input" placeholder="Search notes, PDFs, topics...">
+        <select id="vault-subject-filter" class="glass-select">
+          <option value="all">All Subjects</option>
+          <option value="DBMS">Database Management (DBMS)</option>
+          <option value="OS">Operating Systems (OS)</option>
+          <option value="DSA">Data Structures & Algo (DSA)</option>
+          <option value="CN">Computer Networks (CN)</option>
+          <option value="AI">AI / Machine Learning</option>
+        </select>
+        <select id="vault-semester-filter" class="glass-select">
+          <option value="all">All Semesters</option>
+          <option value="3">Semester 3</option>
+          <option value="5">Semester 5</option>
+          <option value="6">Semester 6</option>
+        </select>
+      </div>
+
+      <div id="vault-resources-grid" class="resource-cards-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 13: SEMESTER COMMAND CENTER
+         ====================================================================== -->
+    <section id="page-semester" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>ACADEMIC HUD</span></div>
+          <h2>Semester Command Center</h2>
+          <p>Holistic overview of CGPA trajectory, attendance margins, assignments submitted, and career readiness.</p>
+        </div>
+        <div class="semester-selector-chip">SEMESTER 5 (CSE)</div>
+      </div>
+
+      <div class="semester-metrics-dashboard">
+        <div class="semester-progress-card glass-panel">
+          <div class="metric-top"><span>CGPA Trajectory</span><strong class="font-arcade">8.82 / 10.0</strong></div>
+          <div class="metric-bar-wrap"><div class="metric-fill-bar" style="width: 88.2%;"></div></div>
+          <span class="sub-text">Consistent Top 10% in CSE Department</span>
+        </div>
+
+        <div class="semester-progress-card glass-panel">
+          <div class="metric-top"><span>Overall Attendance</span><strong class="font-arcade">84%</strong></div>
+          <div class="metric-bar-wrap"><div class="metric-fill-bar emerald" style="width: 84%;"></div></div>
+          <span class="sub-text">Above mandatory 75% cutoff threshold</span>
+        </div>
+
+        <div class="semester-progress-card glass-panel">
+          <div class="metric-top"><span>Course Assignments</span><strong class="font-arcade">9 / 11 Done</strong></div>
+          <div class="metric-bar-wrap"><div class="metric-fill-bar purple" style="width: 81%;"></div></div>
+          <span class="sub-text">2 pending (DBMS & OS)</span>
+        </div>
+
+        <div class="semester-progress-card glass-panel">
+          <div class="metric-top"><span>DSA Practice Progress</span><strong class="font-arcade">142 Problems</strong></div>
+          <div class="metric-bar-wrap"><div class="metric-fill-bar gold" style="width: 71%;"></div></div>
+          <span class="sub-text">Target: 200 Problems for Placement Prep</span>
+        </div>
+      </div>
+
+      <!-- "What should I improve?" Diagnostic Box -->
+      <div class="improvement-diagnostic-panel glass-panel mt-3">
+        <div class="diagnostic-header">
+          <h3>🩺 "What Should I Improve?" — Diagnostic Engine</h3>
+          <span class="badge-dot-green">Active Analysis</span>
+        </div>
+        <div class="diagnostic-items-grid">
+          <div class="diag-card warning">
+            <div class="diag-icon">⚠️</div>
+            <div class="diag-text">
+              <strong>Computer Networks Attendance is 71%</strong>
+              <p>You need to attend the next 3 consecutive lectures to cross the mandatory 75% examination threshold.</p>
+              <button class="text-action-btn" onclick="QuestLogAcademyInstance.addCalendarRemind('CN Lecture Attendance')">Add Calendar Reminder &rarr;</button>
+            </div>
+          </div>
+
+          <div class="diag-card info">
+            <div class="diag-icon">💡</div>
+            <div class="diag-text">
+              <strong>DSA Dynamic Programming Gap</strong>
+              <p>You haven't cleared a DP quest in 10 days. Interview season expects graph and DP competency.</p>
+              <button class="text-action-btn" onclick="QuestLogAcademyInstance.summonDPQuest()">Summon DP Quest (+150 XP) &rarr;</button>
+            </div>
+          </div>
+
+          <div class="diag-card success">
+            <div class="diag-icon">🌟</div>
+            <div class="diag-text">
+              <strong>DBMS Assignment 3 High Priority</strong>
+              <p>Due in 48 hours. Completing this closes all DBMS coursework deliverables.</p>
+              <button class="text-action-btn" onclick="QuestLogAcademyInstance.startDBMSQuest()">Begin Assignment Bounty &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 17: GITHUB INTEGRATION
+         ====================================================================== -->
+    <section id="page-github" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge"><span class="badge-dot"></span><span>CODE ACTIVITY SYNC</span></div>
+          <h2>GitHub Integration</h2>
+          <p>Connect your real GitHub handle to pull public repositories, language distribution, and commit consistency.</p>
+        </div>
+      </div>
+
+      <div class="github-connect-card glass-panel">
+        <div class="github-input-group">
+          <span class="github-icon">🐙</span>
+          <input type="text" id="github-username-input" class="glass-input" placeholder="Enter GitHub username (e.g. torvalds, octocat, or your handle)...">
+          <button id="github-sync-btn" class="glow-action-btn btn-primary-grind">Sync GitHub Profile</button>
+        </div>
+        <p class="sub-text">Uses genuine GitHub REST API (v3). No fabricated statistics.</p>
+      </div>
+
+      <div id="github-profile-display" class="github-display-area" style="display: none;"></div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 16 & EXISTING: WEEKLY TASKS & ROTATING CHALLENGES
+         ====================================================================== -->
+    <section id="page-weekly" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div><div class="section-badge emerald"><span class="badge-dot"></span><span>WEEKLY MISSION</span></div><h2>Weekly Tasks & Challenges</h2><p>Complete missions before Sunday midnight reset to earn bonus XP and maintain rank.</p></div>
+        <div class="weekly-reset-chip" id="weekly-reset-chip">NEW WEEK</div>
+      </div>
+      <div class="weekly-summary-grid">
+        <div class="stat-mini glass-panel"><span>Completed</span><strong id="weekly-completed-count">0 / 5</strong></div>
+        <div class="stat-mini glass-panel"><span>Weekly XP</span><strong id="weekly-xp">0 XP</strong></div>
+        <div class="stat-mini glass-panel"><span>Bonus</span><strong id="weekly-bonus">+0 XP</strong></div>
+      </div>
+      <div id="weekly-tasks-grid" class="feature-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         FEATURE 21: ADVANCED PERSONAL ANALYTICS ("MY PROGRESS")
+         ====================================================================== -->
+    <section id="page-analytics" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge purple"><span class="badge-dot"></span><span>MY PROGRESS & METRICS</span></div>
+          <h2>Advanced Personal Analytics</h2>
+          <p>Visual trends for XP velocity, focus trances, habit consistency, and academic balance.</p>
+        </div>
+      </div>
+
+      <div class="analytics-charts-grid">
+        <div class="chart-card glass-panel">
+          <div class="chart-head"><h4>XP Velocity (Last 7 Days)</h4><span class="badge-mini font-mono">+840 XP this week</span></div>
+          <div id="analytics-xp-chart" class="chart-svg-wrap"></div>
+        </div>
+
+        <div class="chart-card glass-panel">
+          <div class="chart-head"><h4>Activity Breakdown</h4><span class="badge-mini font-mono">By Category</span></div>
+          <div id="analytics-category-chart" class="chart-svg-wrap"></div>
+        </div>
+
+        <div class="chart-card glass-panel">
+          <div class="chart-head"><h4>Focus Trance Hours</h4><span class="badge-mini font-mono" id="analytics-focus-total">0 mins</span></div>
+          <div id="analytics-focus-chart" class="chart-svg-wrap"></div>
+        </div>
+
+        <div class="chart-card glass-panel">
+          <div class="chart-head"><h4>Skill Mastery Balance</h4><span class="badge-mini font-mono">Competencies</span></div>
+          <div id="analytics-skills-chart" class="chart-svg-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         PORTFOLIO (FEATURE 18)
+         ====================================================================== -->
+    <section id="page-portfolio" class="page-section feature-page" hidden>
+      <div class="portfolio-hero glass-panel">
+        <div class="portfolio-avatar" id="portfolio-avatar">⚔️</div>
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>AUTOMATIC STUDENT PORTFOLIO</span></div>
+          <h2 id="portfolio-name">OPERATOR</h2>
+          <p id="portfolio-rank">Novice Apprentice</p>
+        </div>
+        <div class="portfolio-actions-header">
+          <div class="portfolio-score"><span>Total XP</span><strong id="portfolio-xp">0</strong></div>
+          <button id="export-portfolio-btn" class="glass-btn btn-compact">📄 Export PDF</button>
+        </div>
+      </div>
+      <div class="portfolio-stats" id="portfolio-stats"></div>
+      <h3 class="subpage-heading">🏅 Verified Skills & Competencies</h3>
+      <div id="portfolio-skills-badges" class="portfolio-skills-pills"></div>
+      <h3 class="subpage-heading">🏆 Badges & Milestones</h3>
+      <div id="badges-grid" class="badges-grid"></div>
+      <h3 class="subpage-heading">📜 Achievement Timeline</h3>
+      <div id="portfolio-timeline" class="timeline-list"></div>
+    </section>
+
+    <!-- ======================================================================
+         LEADERBOARD (FEATURE 24)
+         ====================================================================== -->
+    <section id="page-leaderboard" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge purple"><span class="badge-dot"></span><span>RANKED ARENA</span></div>
+          <h2>Advanced Leaderboard</h2>
+          <p>Rankings driven by completed bounties, focus trances, and weekly Sunday tests. No artificial spam.</p>
+        </div>
+        <div class="sunday-chip">⚡ SUNDAY TEST UPDATE</div>
+      </div>
+      <div class="leaderboard-tabs" id="leaderboard-tabs">
+        <button class="leader-tab active" data-domain="overall">👑 Global</button>
+        <button class="leader-tab" data-domain="year">🎓 3rd Year</button>
+        <button class="leader-tab" data-domain="branch">💻 CSE Branch</button>
+        <button class="leader-tab" data-domain="programming">⚡ Programming</button>
+        <button class="leader-tab" data-domain="math">🧮 Mathematics</button>
+        <button class="leader-tab" data-domain="hackathons">🚀 Hackathons</button>
+      </div>
+      <div id="leaderboard-table" class="leaderboard-table glass-panel"></div>
+      
+      <div class="test-panel glass-panel mt-3">
+        <div>
+          <h3>📝 Weekly Sunday Subject Test</h3>
+          <p>Submit your verified weekly test score. Updates leaderboard immediately and awards +2x XP.</p>
+        </div>
+        <div class="test-controls">
+          <select id="test-subject" class="glass-select">
+            <option value="programming">Programming</option>
+            <option value="math">Mathematics</option>
+            <option value="science">Science</option>
+          </select>
+          <input id="test-score" class="glass-input" type="number" min="0" max="100" placeholder="Score / 100">
+          <button id="submit-test-btn" class="glow-action-btn btn-primary-grind">🏁 Submit Sunday Test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         GUILDS & ALLIANCES
+         ====================================================================== -->
+    <section id="page-guilds" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel">
+        <div>
+          <div class="section-badge emerald"><span class="badge-dot"></span><span>MULTIPLAYER</span></div>
+          <h2>Guilds & Teams</h2>
+          <p>Form alliances, pool XP, and climb the Guild Leaderboards.</p>
+        </div>
+        <button id="create-guild-btn" class="glow-action-btn btn-primary-grind btn-compact">➕ Form Guild</button>
+      </div>
+
+      <div class="guilds-layout">
+        <div class="guilds-list-col">
+          <h3 class="subpage-heading">⚔️ Active Guilds</h3>
+          <div id="guilds-list" class="guilds-grid"></div>
+        </div>
+        <div class="guild-details-col">
+          <div id="guild-details-panel" class="glass-panel guild-details-panel">
+            <div class="empty-state">
+              <span class="empty-state-icon">🛡️</span>
+              <p>Select a guild to view details or join.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ACTIVITY / CLUB LOG
+         ====================================================================== -->
+    <section id="page-activity" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel"><div><div class="section-badge purple"><span class="badge-dot"></span><span>ACHIEVEMENT LOG</span></div><h2>Club & Event Activity</h2><p>Record participation and wins from college clubs, hackathons and external events.</p></div></div>
+      <div class="activity-form glass-panel">
+        <input id="activity-name" class="glass-input" placeholder="Event name — e.g. Graphica Game-A-Thon">
+        <select id="activity-type" class="glass-select"><option value="club">Club Activity</option><option value="hackathon">College Hackathon</option><option value="external">External Hackathon / Event</option><option value="competition">Competition</option></select>
+        <select id="activity-result" class="glass-select"><option value="participated">Participated</option><option value="finalist">Finalist / Selected</option><option value="won">Won / Prize</option></select>
+        <button id="add-activity-btn" class="glow-action-btn btn-primary-grind">➕ Add Achievement</button>
+      </div>
+      <div class="activity-rule-grid">
+        <div class="rule-card glass-panel"><strong>Club</strong><span>Participation +25 XP &bull; Finalist +100 &bull; Win +250</span></div>
+        <div class="rule-card glass-panel"><strong>External</strong><span>Participation +150 XP &bull; Finalist +300 &bull; Win +600</span></div>
+      </div>
+      <div id="activity-list" class="activity-list"></div>
+    </section>
+
+    <!-- ======================================================================
+         STUDY HUB
+         ====================================================================== -->
+    <section id="page-study" class="page-section feature-page" hidden>
+      <div class="feature-page-header glass-panel"><div><div class="section-badge"><span class="badge-dot"></span><span>KNOWLEDGE VAULT</span></div><h2>Study & Hackathon Hub</h2><p>Curated starting points for subjects, coding and hackathon preparation.</p></div></div>
+      <div class="resource-tabs" id="resource-tabs">
+        <button class="resource-tab active" data-resource="subjects">📖 Subjects</button><button class="resource-tab" data-resource="coding">💻 Coding</button><button class="resource-tab" data-resource="hackathons">🚀 Hackathons</button>
+      </div>
+      <div id="resource-content" class="resource-grid"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>QuestLog &bull; Unified Student Operating System &bull; Vanilla Architecture & Three.js WebGL Engine</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================================================
+       FEATURE 8: CENTRAL QUESTLOG AI ASSISTANT (FLOATING ORB & DRAWER)
+       ======================================================================== -->
+  <div id="questlog-ai-trigger" class="ai-floating-orb" title="Ask QuestLog AI Anything">
+    <div class="ai-orb-glow"></div>
+    <span class="ai-orb-icon">🤖</span>
+    <span class="ai-orb-label">AI</span>
+  </div>
+
+  <div id="questlog-ai-drawer" class="ai-drawer glass-panel" style="display: none;">
+    <div class="ai-drawer-header">
+      <div class="ai-title-wrap">
+        <span class="ai-status-dot"></span>
+        <strong class="font-arcade">QUESTLOG AI ADVISOR</strong>
+      </div>
+      <button id="close-ai-drawer-btn" class="modal-close-icon">&times;</button>
+    </div>
+
+    <div class="ai-messages-scroll" id="ai-messages-container">
+      <div class="ai-message bot">
+        <div class="ai-msg-avatar">🤖</div>
+        <div class="ai-msg-content">
+          <p>Greetings, Operator. I have real-time access to your assignments, exams, skill tree, and study schedule. What would you like to achieve right now?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-drawer-prompts">
+      <button class="ai-quick-prompt" data-prompt="I have 2 hours tonight. What should I do?">⚡ "I have 2 hours tonight"</button>
+      <button class="ai-quick-prompt" data-prompt="What assignments are due this week?">📚 "What is due this week?"</button>
+      <button class="ai-quick-prompt" data-prompt="Help me prepare for my DBMS exam.">📝 "Prepare for DBMS exam"</button>
+      <button class="ai-quick-prompt" data-prompt="Which skill should I unlock next?">🗺️ "Next skill to unlock?"</button>
+    </div>
+
+    <form id="ai-chat-form" class="ai-input-form">
+      <input type="text" id="ai-chat-input" class="glass-input" placeholder="Ask QuestLog AI anything..." autocomplete="off">
+      <button type="submit" class="glow-action-btn btn-primary-grind btn-compact">Send</button>
+    </form>
+  </div>
+
+  <!-- Level Up Modal Overlay -->
+  <div id="levelup-modal" class="modal-backdrop" hidden style="display: none;">
+    <div class="modal-card glass-panel levelup-card">
+      <div class="modal-glow" aria-hidden="true"></div>
+      <div class="levelup-badge-icon">👑</div>
+      <h2 class="levelup-heading font-arcade">LEVEL UP!</h2>
+      <p class="levelup-subtext">You have ascended to greater discipline.</p>
+      
+      <div class="new-level-highlight font-arcade" id="modal-new-level-text">LEVEL 2</div>
+      <div class="rank-upgrade-box" id="modal-rank-upgrade-text">Rank: Algorithm Knight</div>
+
+      <div class="unlocked-reward-banner" id="modal-unlocked-gear-box" style="display: none;">
+        <span class="unlocked-title">🎁 NEW GEAR UNLOCKED IN THE VAULT!</span>
+        <span class="unlocked-item-name" id="modal-unlocked-gear-name">Hacker's Crown</span>
+      </div>
+
+      <p class="levelup-cheer">Stats increased &bull; New equipment unlocked in The Vault &bull; Max Stamina +15%</p>
+      
+      <button id="close-levelup-modal-btn" class="glow-action-btn btn-primary-grind modal-dismiss-btn">
+        <span>Claim Glory & Return</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- App Logic Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
